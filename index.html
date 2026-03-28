@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<title>🌯 LavashBro</title>
+
+<style>
+body { margin:0; font-family:sans-serif; background:#f5f5f5; }
+.header { background:#ff6600; color:white; padding:15px; font-size:20px; }
+.container { padding:10px; }
+
+.card {
+    background:white;
+    border-radius:15px;
+    padding:10px;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+}
+
+.card img { width:70px; border-radius:10px; }
+.info { flex:1; margin-left:10px; }
+.price { font-weight:bold; }
+
+button {
+    background:#ff6600;
+    color:white;
+    border:none;
+    padding:8px;
+    border-radius:8px;
+}
+
+.cart {
+    position:fixed;
+    bottom:0;
+    width:100%;
+    background:white;
+    padding:10px;
+}
+
+input {
+    width:100%;
+    padding:10px;
+    margin:5px 0;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">🌯 LavashBro</div>
+
+<div class="container">
+
+<div class="card">
+<img src="https://e7.pngegg.com/pngimages/534/812/png-clipart-stavropol-makizushi-shawarma-lavash-sushi-sushi-food-tomato.png">
+<div class="info">
+Classic Lavash
+<div class="price">30 000 uzs</div>
+</div>
+<button onclick="add('Classic Lavash',30000)">+</button>
+</div>
+
+<div class="card">
+<img src="https://static.vecteezy.com/system/resources/previews/035/894/858/non_2x/ai-generated-close-up-photo-of-big-and-fresh-doner-without-background-transparent-inside-png.png">
+<div class="info">
+Big Lavash
+<div class="price">40 000 uzs</div>
+</div>
+<button onclick="add('Cheese Lavash',35000)">+</button>
+</div>
+
+<div class="card">
+<img src="https://static.vecteezy.com/system/resources/previews/037/751/381/non_2x/coca-cola-plastic-bottle-isolated-on-transparent-background-free-png.png">
+<div class="info">
+Cola 0.5
+<div class="price">10000</div>
+</div>
+<button onclick="add('Cola',10000)">+</button>
+</div>
+
+</div>
+
+<div class="cart">
+<div id="cart"></div>
+
+<input id="name" placeholder="Ismingiz">
+<input id="phone" placeholder="Telefon">
+<input id="address" placeholder="Manzil">
+
+<button onclick="getLocation()">📍 Lokatsiya</button>
+<button onclick="pay()">💳 To‘lov qilish</button>
+<button onclick="order()">✅ Buyurtma berish</button>
+
+</div>
+
+<script>
+let cart = {};
+
+function add(name, price){
+    if(!cart[name]){
+        cart[name] = {price:price, qty:1};
+    } else {
+        cart[name].qty++;
+    }
+    render();
+}
+
+function minus(name){
+    if(cart[name]){
+        cart[name].qty--;
+        if(cart[name].qty<=0){
+            delete cart[name];
+        }
+    }
+    render();
+}
+
+function render(){
+    let html = "";
+    let total = 0;
+
+    for(let name in cart){
+        let item = cart[name];
+        html += `
+        ${name}
+        <button onclick="minus('${name}')">-</button>
+        ${item.qty}
+        <button onclick="add('${name}',${item.price})">+</button><br>
+        `;
+        total += item.price * item.qty;
+    }
+
+    html += "<b>Jami: "+total+"</b>";
+    document.getElementById("cart").innerHTML = html;
+}
+
+function getLocation(){
+    navigator.geolocation.getCurrentPosition(pos=>{
+        document.getElementById("address").value =
+        pos.coords.latitude + "," + pos.coords.longitude;
+    });
+}
+
+function pay(){
+    window.location.href = "https://my.click.uz/pay?id=XXXX";
+}
+
+function saveOrder(order){
+    let history = JSON.parse(localStorage.getItem("orders") || "[]");
+    history.push(order);
+    localStorage.setItem("orders", JSON.stringify(history));
+}
+
+function success(){
+    document.body.innerHTML = `
+    <div style="text-align:center;padding-top:50px;">
+    <h1>✅</h1>
+    <h2>Buyurtma qabul qilindi!</h2>
+    </div>`;
+}
+
+function order(){
+    const data = {
+        cart: cart,
+        name: document.getElementById("name").value,
+        phone: document.getElementById("phone").value,
+        address: document.getElementById("address").value
+    };
+
+    saveOrder(data);
+    Telegram.WebApp.sendData(JSON.stringify(data));
+    success();
+}
+</script>
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyCanG9W8SZRTdsWJQuqTSRFo3SetgWm7t4",
+    authDomain: "lavashbro-50af4.firebaseapp.com",
+    projectId: "lavashbro-50af4",
+    storageBucket: "lavashbro-50af4.firebasestorage.app",
+    messagingSenderId: "516749175481",
+    appId: "1:516749175481:web:5e85a2db7ca9b558920968"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
+
+</body>
+</html>
